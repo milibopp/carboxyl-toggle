@@ -7,7 +7,7 @@ use carboxyl_window::{RunnableWindow, StreamingWindow, SourceWindow};
 use carboxyl::Signal;
 use elmesque::{Element, Renderer};
 use shader_version::OpenGL;
-use window::WindowSettings;
+use piston::window::WindowSettings;
 use graphics::context::Context;
 
 pub fn run_glutin<F>(settings: WindowSettings, app: F)

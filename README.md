@@ -9,7 +9,7 @@ type Input = {
 }
 
 type Action
-intent : Context -> Event -> Action
+intent : Context -> Event -> Option Action
 
 type State
 update : Action -> State -> State
@@ -21,7 +21,7 @@ view : Context -> State -> Output
 
 program : Input -> Signal Output
 program {context, events} =
-    let actions: Stream Action = snapshot intent events context
+    let actions: Stream Action = snapshot intent events context |> filter_some
     let state: Signal State = fold init update actions
     let output: Signal Output = lift2 view context state
     output
