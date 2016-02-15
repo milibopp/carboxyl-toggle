@@ -35,7 +35,8 @@ fn centered(size: (u32, u32), position: (f64, f64)) -> (f64, f64) {
 }
 
 fn hovers(position: (f64, f64)) -> bool {
-    position.0 > 0.0
+    position.0 > -100.0 && position.0 < 100.0 &&
+    position.1 > -50.0 && position.1 < 50.0
 }
 
 fn context<W: StreamingWindow>(window: &W) -> Signal<Context> {
