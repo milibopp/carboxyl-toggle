@@ -23,16 +23,32 @@ use elmesque::form::{collage, text, rect};
 mod runner;
 
 
-
-type Context = (f64, f64);
+#[derive(Clone)]
+enum Context {
+    Hover,
+    Free
+}
 
 fn centered(size: (u32, u32), position: (f64, f64)) -> (f64, f64) {
     (position.0 - size.0 as f64 / 2.0,
      position.1 - size.1 as f64 / 2.0)
 }
 
+fn hovers(position: (f64, f64)) -> bool {
+    position.0 > 0.0
+}
+
 fn context<W: StreamingWindow>(window: &W) -> Signal<Context> {
-    lift!(centered, &window.size(), &window.cursor())
+    lift!(
+        |size, cursor|
+            if hovers(centered(size, cursor)) {
+                Context::Hover
+            } else {
+                Context::Free
+            },
+        &window.size(),
+        &window.cursor()
+    )
 }
 
 
@@ -58,15 +74,10 @@ fn events<W: StreamingWindow>(window: &W) -> Stream<Event> {
 
 type Action = ();
 
-fn hovers(position: (f64, f64)) -> bool {
-    position.0 > 0.0
-}
-
-fn intent(cursor_position: Context, (): Event) -> Option<Action> {
-    if hovers(cursor_position) {
-        Some(())
-    } else {
-        None
+fn intent(context: Context, (): Event) -> Option<Action> {
+    match context {
+        Context::Hover => Some(()),
+        Context::Free => None
     }
 }
 
