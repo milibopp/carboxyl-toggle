@@ -17,7 +17,7 @@ use carboxyl_window::StreamingWindow;
 use carboxyl_window::button::ButtonEvent;
 use elmesque::{Element, Form};
 use elmesque::text::Text;
-use elmesque::color::{Color, black, green, red};
+use elmesque::color::{Color, black, light_blue, light_orange, blue, orange};
 use elmesque::form::{collage, text, rect};
 
 mod runner;
@@ -106,8 +106,14 @@ fn button(color: Color) -> Form {
     rect(200.0, 100.0).filled(color)
 }
 
-fn view(_cursor: Context, state: State) -> View {
-    vec![button(if state { red() } else { green() }), hello()]
+fn view(context: Context, state: State) -> View {
+    let color = match (context, state) {
+        (Context::Hover, true) => light_blue(),
+        (Context::Hover, false) => light_orange(),
+        (Context::Free, true) => blue(),
+        (Context::Free, false) => orange()
+    };
+    vec![button(color), hello()]
 }
 
 fn display((width, height): (u32, u32), forms: Vec<Form>) -> Element {
