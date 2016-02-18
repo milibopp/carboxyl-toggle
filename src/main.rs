@@ -23,18 +23,23 @@ use elmesque::form::{collage, text, rect};
 mod runner;
 
 
+type Position = (f64, f64);
+
+type Dimension = (u32, u32);
+
+
 #[derive(Clone)]
 enum Context {
     Hover,
     Free
 }
 
-fn centered(size: (u32, u32), position: (f64, f64)) -> (f64, f64) {
+fn centered(size: Dimension, position: Position) -> Position {
     (position.0 - size.0 as f64 / 2.0,
      position.1 - size.1 as f64 / 2.0)
 }
 
-fn hovers(position: (f64, f64)) -> bool {
+fn hovers(position: Position) -> bool {
     position.0 > -100.0 && position.0 < 100.0 &&
     position.1 > -50.0 && position.1 < 50.0
 }
@@ -53,7 +58,8 @@ fn context<W: StreamingWindow>(window: &W) -> Signal<Context> {
 }
 
 
-type Event = ();
+#[derive(Clone)]
+enum Event { Click }
 
 fn clicks(event: ButtonEvent) -> Option<Event> {
     use piston::input::Button::Mouse;
@@ -61,7 +67,7 @@ fn clicks(event: ButtonEvent) -> Option<Event> {
     use carboxyl_window::button::ButtonState::Pressed;
 
     if event.button == Mouse(Left) && event.state == Pressed {
-        Some(())
+        Some(Event::Click)
     } else {
         None
     }
@@ -72,12 +78,12 @@ fn events<W: StreamingWindow>(window: &W) -> Stream<Event> {
         .filter_map(clicks)
 }
 
+#[derive(Clone)]
+enum Action { Toggle }
 
-type Action = ();
-
-fn intent(context: Context, (): Event) -> Option<Action> {
+fn intent(context: Context, _: Event) -> Option<Action> {
     match context {
-        Context::Hover => Some(()),
+        Context::Hover => Some(Action::Toggle),
         Context::Free => None
     }
 }
@@ -89,7 +95,7 @@ fn init() -> bool {
     false
 }
 
-fn update(current: State, (): Action) -> State {
+fn update(current: State, _: Action) -> State {
     !current
 }
 
@@ -107,11 +113,13 @@ fn button(color: Color) -> Form {
 }
 
 fn view(context: Context, state: State) -> View {
-    let color = match (context, state) {
-        (Context::Hover, true) => light_blue(),
-        (Context::Hover, false) => light_orange(),
-        (Context::Free, true) => blue(),
-        (Context::Free, false) => orange()
+    let color = match context {
+        Context::Hover =>
+            if state { light_blue() }
+            else { light_orange() },
+        Context::Free =>
+            if state { blue() }
+            else { orange() }
     };
     vec![button(color), hello()]
 }
