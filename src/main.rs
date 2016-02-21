@@ -39,14 +39,28 @@ fn view((width, height): (u32, u32), forms: Vec<Form>) -> Element {
 
 
 fn app<W: StreamingWindow>(window: &W) -> Signal<Element> {
-    let context = lift!(button::context,
-        &lift!(centered, &window.size(), &window.cursor()));
-    let actions = context.snapshot(&button::events(window), button::intent)
+    let button = button::Button {
+        width: 200.0,
+        height: 100.0,
+        label: "Hello!".to_string()
+    };
+    let context = {
+        let button = button.clone();
+        lift!(move |x| button.context(x),
+            &lift!(centered, &window.size(), &window.cursor()))
+    };
+    let actions = context.snapshot(&button.events(window), {
+            let button = button.clone();
+            move |x, y| button.intent(x, y)
+        })
         .filter_some();
-    let state = actions.fold(button::init(), button::update);
+    let state = actions.fold(button.init(), {
+        let button = button.clone();
+        move |x, y| button.update(x, y)
+    });
     lift!(view,
         &window.size(),
-        &lift!(button::view, &context, &state))
+        &lift!(move |x, y| button.view(x, y), &context, &state))
 }
 
 

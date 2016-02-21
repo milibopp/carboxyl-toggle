@@ -8,88 +8,92 @@ use elmesque::form::{text, rect};
 use ::Position;
 
 #[derive(Clone)]
-pub enum Context {
-    Hover,
-    Free
-}
-
-fn hovers(position: Position) -> bool {
-    position.0 > -100.0 && position.0 < 100.0 &&
-    position.1 > -50.0 && position.1 < 50.0
-}
-
-pub fn context(cursor: Position) -> Context {
-    if hovers(cursor) {
-        Context::Hover
-    } else {
-        Context::Free
-    }
-}
-
+pub enum Context { Hover, Free }
 
 #[derive(Clone)]
 pub enum Event { Click }
 
-fn clicks(event: ButtonEvent) -> Option<Event> {
-    use piston::input::Button::Mouse;
-    use piston::input::MouseButton::Left;
-    use carboxyl_window::button::ButtonState::Pressed;
-
-    if event.button == Mouse(Left) && event.state == Pressed {
-        Some(Event::Click)
-    } else {
-        None
-    }
-}
-
-pub fn events<W: StreamingWindow>(window: &W) -> Stream<Event> {
-    window.buttons()
-        .filter_map(clicks)
-}
-
 #[derive(Clone)]
 pub enum Action { Toggle }
 
-pub fn intent(context: Context, _: Event) -> Option<Action> {
-    match context {
-        Context::Hover => Some(Action::Toggle),
-        Context::Free => None
-    }
-}
-
-
 pub type State = bool;
-
-pub fn init() -> State {
-    false
-}
-
-pub fn update(current: State, _: Action) -> State {
-    !current
-}
-
 
 pub type View = Vec<Form>;
 
-fn hello() -> Form {
-    text(Text::from_string("Hello!".to_string())
-        .color(black())
-        .height(50.))
+
+#[derive(Clone)]
+pub struct Button {
+    pub width: f64,
+    pub height: f64,
+    pub label: String
 }
 
-fn button(color: Color) -> Form {
-    rect(200.0, 100.0).filled(color)
-}
+impl Button {
+    fn hovers(&self, position: Position) -> bool {
+        let Button {width, height, ..} = *self;
+        position.0 > -width / 2.0 && position.0 < self.width / 2.0 &&
+        position.1 > -height / 2.0 && position.1 < self.height / 2.0
+    }
 
-pub fn view(context: Context, state: State) -> View {
-    let color = match context {
-        Context::Hover =>
-            if state { light_blue() }
-            else { light_orange() },
-        Context::Free =>
-            if state { blue() }
-            else { orange() }
-    };
-    vec![button(color), hello()]
-}
+    pub fn context(&self, cursor: Position) -> Context {
+        if self.hovers(cursor) {
+            Context::Hover
+        } else {
+            Context::Free
+        }
+    }
 
+    fn clicks(event: ButtonEvent) -> Option<Event> {
+        use piston::input::Button::Mouse;
+        use piston::input::MouseButton::Left;
+        use carboxyl_window::button::ButtonState::Pressed;
+
+        if event.button == Mouse(Left) && event.state == Pressed {
+            Some(Event::Click)
+        } else {
+            None
+        }
+    }
+
+    pub fn events<W: StreamingWindow>(&self, window: &W) -> Stream<Event> {
+        window.buttons()
+            .filter_map(Button::clicks)
+    }
+
+    pub fn intent(&self, context: Context, _: Event) -> Option<Action> {
+        match context {
+            Context::Hover => Some(Action::Toggle),
+            Context::Free => None
+        }
+    }
+
+    pub fn init(&self) -> State {
+        false
+    }
+
+    pub fn update(&self, current: State, _: Action) -> State {
+        !current
+    }
+
+    fn hello(&self) -> Form {
+        text(Text::from_string(self.label.clone())
+            .color(black())
+            .height(self.height / 2.0))
+    }
+
+    fn button(&self, color: Color) -> Form {
+        rect(self.width, self.height).filled(color)
+    }
+
+    pub fn view(&self, context: Context, state: State) -> View {
+        let color = match context {
+            Context::Hover =>
+                if state { light_blue() }
+                else { light_orange() },
+            Context::Free =>
+                if state { blue() }
+                else { orange() }
+        };
+        vec![self.button(color), self.hello()]
+    }
+}
