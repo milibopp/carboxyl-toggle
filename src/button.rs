@@ -6,6 +6,7 @@ use elmesque::text::Text;
 use elmesque::color::{Color, black, light_blue, light_orange, blue, orange};
 use elmesque::form::{text, rect};
 use ::Position;
+use ::component::Component;
 
 pub type Context = Position;
 
@@ -25,6 +26,38 @@ pub struct Button {
     pub width: f64,
     pub height: f64,
     pub label: String
+}
+
+impl Component for Button {
+    type Context = Position;
+    type Event = Event;
+    type Action = Action;
+    type State = bool;
+    type View = Vec<Form>;
+
+
+    fn intent(&self, context: Context, _: Event) -> Option<Action> {
+        if self.hovers(context) { Some(Action::Toggle) } else { None }
+    }
+
+    fn init(&self) -> State {
+        false
+    }
+
+    fn update(&self, current: State, _: Action) -> State {
+        !current
+    }
+
+    fn view(&self, context: Context, state: State) -> View {
+        let color = if self.hovers(context) {
+            if state { light_blue() }
+            else { light_orange() }
+        } else {
+            if state { blue() }
+            else { orange() }
+        };
+        vec![self.button(color), self.hello()]
+    }
 }
 
 impl Button {
@@ -51,17 +84,6 @@ impl Button {
             .filter_map(Button::clicks)
     }
 
-    pub fn intent(&self, context: Context, _: Event) -> Option<Action> {
-        if self.hovers(context) { Some(Action::Toggle) } else { None }
-    }
-
-    pub fn init(&self) -> State {
-        false
-    }
-
-    pub fn update(&self, current: State, _: Action) -> State {
-        !current
-    }
 
     fn hello(&self) -> Form {
         text(Text::from_string(self.label.clone())
@@ -73,14 +95,4 @@ impl Button {
         rect(self.width, self.height).filled(color)
     }
 
-    pub fn view(&self, context: Context, state: State) -> View {
-        let color = if self.hovers(context) {
-            if state { light_blue() }
-            else { light_orange() }
-        } else {
-            if state { blue() }
-            else { orange() }
-        };
-        vec![self.button(color), self.hello()]
-    }
 }

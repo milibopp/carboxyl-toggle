@@ -18,9 +18,11 @@ use elmesque::{Element, Form};
 use elmesque::color::black;
 use elmesque::form::collage;
 
+use component::Component;
+
 mod runner;
 mod button;
-mod component;
+pub mod component;
 
 pub type Position = (f64, f64);
 
