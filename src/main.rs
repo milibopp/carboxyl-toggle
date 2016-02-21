@@ -12,23 +12,20 @@ extern crate carboxyl;
 extern crate carboxyl_window;
 
 use piston::window::WindowSettings;
-use carboxyl::{Signal, Stream};
-use carboxyl_window::button::ButtonEvent;
 use carboxyl_window::StreamingWindow;
+use carboxyl_window::button::ButtonEvent;
 use elmesque::Element;
 use elmesque::color::black;
 use elmesque::form::collage;
 
 use component::Component;
 use button::Button;
+use start::{start, Context, Position, Dimension};
 
 mod runner;
 mod button;
+pub mod start;
 pub mod component;
-
-pub type Position = (f64, f64);
-
-type Dimension = (u32, u32);
 
 fn centered(size: Dimension, position: Position) -> Position {
     (position.0 - size.0 as f64 / 2.0,
@@ -73,48 +70,18 @@ impl Component for App {
     }
 }
 
-#[derive(Clone)]
-struct Context {
-    position: Position,
-    size: Dimension
-}
-
-fn window_context<W: StreamingWindow>(window: &W) -> Signal<Context> {
-    lift!(|p, s| Context { position: (p.0 as f64, p.1 as f64), size: s },
-        &window.cursor(),
-        &window.size()
-    )
-}
-
-fn window_events<W: StreamingWindow>(window: &W) -> Stream<ButtonEvent> {
-    window.buttons()
-}
-
-
-fn app<W: StreamingWindow>(window: &W) -> Signal<Element> {
-    let app = App { button: button::Button {
+fn app() -> App {
+    App { button: button::Button {
         width: 200.0,
         height: 100.0,
         label: "Hello!".to_string()
-    }};
-    let context = window_context(window);
-    let actions = context.snapshot(&window_events(window), {
-            let app = app.clone();
-            move |x, y| app.intent(x, y)
-        })
-        .filter_some();
-    let state = actions.fold(app.init(), {
-        let app = app.clone();
-        move |x, y| app.update(x, y)
-    });
-    lift!(move |x, y| app.view(x, y), &context, &state)
+    }}
 }
-
 
 fn settings() -> WindowSettings {
     WindowSettings::new("carboxyl_window :: example/simple.rs", (640, 480))
 }
 
 fn main() {
-    runner::run_glutin(settings(), app);
+    runner::run_glutin(settings(), |win| start(app(), win));
 }

@@ -3,7 +3,7 @@ use elmesque::Form;
 use elmesque::text::Text;
 use elmesque::color::{Color, black, light_blue, light_orange, blue, orange};
 use elmesque::form::{text, rect};
-use ::Position;
+use ::start::Position;
 use ::component::Component;
 
 pub type Context = Position;
