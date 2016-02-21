@@ -10,22 +10,24 @@ extern crate glutin_window;
 #[macro_use(lift)]
 extern crate carboxyl;
 extern crate carboxyl_window;
+extern crate carboxyl_2d;
+extern crate benzene;
 
 use piston::window::WindowSettings;
-use carboxyl_window::StreamingWindow;
-use carboxyl_window::button::ButtonEvent;
+use carboxyl_window::{Context, Event};
+use carboxyl_2d::Driver2d;
+use benzene::{Driver, Component};
 use elmesque::Element;
 use elmesque::color::black;
 use elmesque::form::collage;
 
-use component::Component;
 use button::Button;
-use start::{Context, Position, Dimension};
 
-mod runner;
 mod button;
-pub mod start;
-pub mod component;
+
+pub type Position = (f64, f64);
+
+pub type Dimension = (u32, u32);
 
 fn centered(size: Dimension, position: Position) -> Position {
     (position.0 - size.0 as f64 / 2.0,
@@ -39,16 +41,17 @@ struct App {
 
 impl Component for App {
     type Context = Context;
-    type Event = ButtonEvent;
+    type Event = Event;
     type Action = button::Action;
     type State = button::State;
     type View = Element;
 
-    fn intent(&self, context: Context, event: ButtonEvent)
+    fn intent(&self, context: Context, event: Event)
         -> Option<button::Action>
     {
-        let Context {position, size, ..} = context;
-        self.button.intent(centered(size, position), event)
+        self.button.intent(
+            centered(context.window.size, context.cursor.position),
+            event)
     }
 
     fn init(&self) -> button::State {
@@ -62,9 +65,10 @@ impl Component for App {
     }
 
     fn view(&self, context: Context, state: button::State) -> Element {
-        let (width, height) = context.size;
-        let Context {position, size, ..} = context;
-        let button_view = self.button.view(centered(size, position), state);
+        let (width, height) = context.window.size;
+        let button_view = self.button.view(
+            centered(context.window.size, context.cursor.position),
+            state);
         collage(width as i32, height as i32, button_view)
             .clear(black())
     }
@@ -83,6 +87,7 @@ fn settings() -> WindowSettings {
 }
 
 fn main() {
-    runner::run_glutin(settings(),
-        |win| start::start(app(), start::window_communication(win)));
+    let mut driver2d = Driver2d::new(settings());
+    let output = benzene::start(app(), driver2d.output());
+    driver2d.run(output);
 }

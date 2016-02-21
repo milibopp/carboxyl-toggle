@@ -1,14 +1,13 @@
-use carboxyl_window::button::ButtonEvent;
 use elmesque::Form;
 use elmesque::text::Text;
 use elmesque::color::{Color, black, light_blue, light_orange, blue, orange};
 use elmesque::form::{text, rect};
-use ::start::Position;
-use ::component::Component;
+use ::Position;
+use benzene::Component;
+
+pub use carboxyl_window::Event;
 
 pub type Context = Position;
-
-pub type Event = ButtonEvent;
 
 #[derive(Clone)]
 pub enum Action { Toggle }
@@ -67,12 +66,12 @@ impl Button {
         position.1 > -height / 2.0 && position.1 < self.height / 2.0
     }
 
-    fn click(&self, event: ButtonEvent) -> bool {
+    fn click(&self, event: Event) -> bool {
         use piston::input::Button::Mouse;
         use piston::input::MouseButton::Left;
-        use carboxyl_window::button::ButtonState::Pressed;
+        use carboxyl_window::Event::Press;
 
-        event.button == Mouse(Left) && event.state == Pressed
+        event == Press(Mouse(Left))
     }
 
     fn hello(&self) -> Form {

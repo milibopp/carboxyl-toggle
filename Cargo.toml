@@ -5,7 +5,9 @@ authors = ["Eduard Bopp <eduard.bopp@aepsil0n.de>"]
 
 [dependencies]
 carboxyl = "0.2"
-carboxyl_window = "0.0.2"
+carboxyl_window = "0.0.3"
+carboxyl-2d = { path = "../2d" }
+benzene = { path = "../benzene" }
 glutin = "0.4"
 shader_version = "0.2"
 pistoncore-glutin_window = "0.20"
