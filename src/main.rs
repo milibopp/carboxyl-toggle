@@ -10,13 +10,13 @@ extern crate glutin_window;
 #[macro_use(lift)]
 extern crate carboxyl;
 extern crate carboxyl_window;
-extern crate carboxyl_2d;
 extern crate benzene;
+extern crate benzene_2d;
 
 use piston::window::WindowSettings;
 use carboxyl_window::{Context, Event};
-use carboxyl_2d::Driver2d;
 use benzene::{Driver, Component};
+use benzene_2d::Driver2d;
 use elmesque::Element;
 use elmesque::color::black;
 use elmesque::form::collage;
