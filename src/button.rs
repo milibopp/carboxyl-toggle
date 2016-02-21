@@ -1,6 +1,4 @@
-use carboxyl_window::StreamingWindow;
 use carboxyl_window::button::ButtonEvent;
-use carboxyl::Stream;
 use elmesque::Form;
 use elmesque::text::Text;
 use elmesque::color::{Color, black, light_blue, light_orange, blue, orange};
@@ -10,8 +8,7 @@ use ::component::Component;
 
 pub type Context = Position;
 
-#[derive(Clone)]
-pub enum Event { Click }
+pub type Event = ButtonEvent;
 
 #[derive(Clone)]
 pub enum Action { Toggle }
@@ -35,9 +32,12 @@ impl Component for Button {
     type State = bool;
     type View = Vec<Form>;
 
-
-    fn intent(&self, context: Context, _: Event) -> Option<Action> {
-        if self.hovers(context) { Some(Action::Toggle) } else { None }
+    fn intent(&self, context: Context, event: Event) -> Option<Action> {
+        if self.click(event) && self.hovers(context) {
+            Some(Action::Toggle)
+        } else {
+            None
+        }
     }
 
     fn init(&self) -> State {
@@ -67,23 +67,13 @@ impl Button {
         position.1 > -height / 2.0 && position.1 < self.height / 2.0
     }
 
-    fn clicks(event: ButtonEvent) -> Option<Event> {
+    fn click(&self, event: ButtonEvent) -> bool {
         use piston::input::Button::Mouse;
         use piston::input::MouseButton::Left;
         use carboxyl_window::button::ButtonState::Pressed;
 
-        if event.button == Mouse(Left) && event.state == Pressed {
-            Some(Event::Click)
-        } else {
-            None
-        }
+        event.button == Mouse(Left) && event.state == Pressed
     }
-
-    pub fn events<W: StreamingWindow>(&self, window: &W) -> Stream<Event> {
-        window.buttons()
-            .filter_map(Button::clicks)
-    }
-
 
     fn hello(&self) -> Form {
         text(Text::from_string(self.label.clone())
@@ -94,5 +84,4 @@ impl Button {
     fn button(&self, color: Color) -> Form {
         rect(self.width, self.height).filled(color)
     }
-
 }
