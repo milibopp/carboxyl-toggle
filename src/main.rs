@@ -1,12 +1,7 @@
 //! Simple interactive application
 
 extern crate elmesque;
-extern crate graphics;
-extern crate glium;
-extern crate glium_graphics;
-extern crate shader_version;
 extern crate piston;
-extern crate glutin_window;
 #[macro_use(lift)]
 extern crate carboxyl;
 extern crate carboxyl_window;
