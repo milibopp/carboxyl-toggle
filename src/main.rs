@@ -20,6 +20,7 @@ use elmesque::form::collage;
 
 mod runner;
 mod button;
+mod component;
 
 pub type Position = (f64, f64);
 
