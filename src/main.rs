@@ -20,7 +20,7 @@ use elmesque::form::collage;
 
 use component::Component;
 use button::Button;
-use start::{start, Context, Position, Dimension};
+use start::{Context, Position, Dimension};
 
 mod runner;
 mod button;
@@ -83,5 +83,6 @@ fn settings() -> WindowSettings {
 }
 
 fn main() {
-    runner::run_glutin(settings(), |win| start(app(), win));
+    runner::run_glutin(settings(),
+        |win| start::start(app(), start::window_communication(win)));
 }

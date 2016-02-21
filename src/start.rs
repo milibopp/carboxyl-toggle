@@ -1,4 +1,3 @@
-use elmesque::Element;
 use carboxyl_window::StreamingWindow;
 use carboxyl_window::button::ButtonEvent;
 use carboxyl::{Signal, Stream};
@@ -25,18 +24,30 @@ fn window_events<W: StreamingWindow>(window: &W) -> Stream<ButtonEvent> {
     window.buttons()
 }
 
-pub fn start<C, W>(app: C, window: &W) -> Signal<Element>
-    where C: Component<Context=Context, Event=ButtonEvent, View=Element> +
-             Clone + Send + Sync + 'static,
+pub fn window_communication<W: StreamingWindow>(window: &W)
+    -> Communication<Context, ButtonEvent>
+{
+    Communication {
+        context: window_context(window),
+        events: window_events(window)
+    }
+}
+
+pub struct Communication<C, E> {
+    context: Signal<C>,
+    events: Stream<E>
+}
+
+pub fn start<C>(app: C, inputs: Communication<C::Context, C::Event>)
+    -> Signal<C::View>
+    where C: Component + Clone + Send + Sync + 'static,
           C::Action: Clone + Send + Sync + 'static,
           C::State: Clone + Send + Sync + 'static,
           C::Context: Clone + Send + Sync + 'static,
           C::Event: Clone + Send + Sync + 'static,
-          C::View: Clone + Send + Sync + 'static,
-          W: StreamingWindow
+          C::View: Clone + Send + Sync + 'static
 {
-    let context = window_context(window);
-    let actions = context.snapshot(&window_events(window), {
+    let actions = inputs.context.snapshot(&inputs.events, {
             let app = app.clone();
             move |x, y| app.intent(x, y)
         })
@@ -45,5 +56,5 @@ pub fn start<C, W>(app: C, window: &W) -> Signal<Element>
         let app = app.clone();
         move |x, y| app.update(x, y)
     });
-    lift!(move |x, y| app.view(x, y), &context, &state)
+    lift!(move |x, y| app.view(x, y), &inputs.context, &state)
 }
