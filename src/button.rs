@@ -2,8 +2,9 @@ use elmesque::Form;
 use elmesque::text::Text;
 use elmesque::color::{Color, black, light_blue, light_orange, blue, orange};
 use elmesque::form::{text, rect};
-use ::Position;
 use benzene::Component;
+
+use app::Position;
 
 pub use carboxyl_window::Event;
 
