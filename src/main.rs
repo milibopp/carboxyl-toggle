@@ -44,11 +44,7 @@ fn app<W: StreamingWindow>(window: &W) -> Signal<Element> {
         height: 100.0,
         label: "Hello!".to_string()
     };
-    let context = {
-        let button = button.clone();
-        lift!(move |x| button.context(x),
-            &lift!(centered, &window.size(), &window.cursor()))
-    };
+    let context = lift!(centered, &window.size(), &window.cursor());
     let actions = context.snapshot(&button.events(window), {
             let button = button.clone();
             move |x, y| button.intent(x, y)

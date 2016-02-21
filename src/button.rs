@@ -7,8 +7,7 @@ use elmesque::color::{Color, black, light_blue, light_orange, blue, orange};
 use elmesque::form::{text, rect};
 use ::Position;
 
-#[derive(Clone)]
-pub enum Context { Hover, Free }
+pub type Context = Position;
 
 #[derive(Clone)]
 pub enum Event { Click }
@@ -35,14 +34,6 @@ impl Button {
         position.1 > -height / 2.0 && position.1 < self.height / 2.0
     }
 
-    pub fn context(&self, cursor: Position) -> Context {
-        if self.hovers(cursor) {
-            Context::Hover
-        } else {
-            Context::Free
-        }
-    }
-
     fn clicks(event: ButtonEvent) -> Option<Event> {
         use piston::input::Button::Mouse;
         use piston::input::MouseButton::Left;
@@ -61,10 +52,7 @@ impl Button {
     }
 
     pub fn intent(&self, context: Context, _: Event) -> Option<Action> {
-        match context {
-            Context::Hover => Some(Action::Toggle),
-            Context::Free => None
-        }
+        if self.hovers(context) { Some(Action::Toggle) } else { None }
     }
 
     pub fn init(&self) -> State {
@@ -86,13 +74,12 @@ impl Button {
     }
 
     pub fn view(&self, context: Context, state: State) -> View {
-        let color = match context {
-            Context::Hover =>
-                if state { light_blue() }
-                else { light_orange() },
-            Context::Free =>
-                if state { blue() }
-                else { orange() }
+        let color = if self.hovers(context) {
+            if state { light_blue() }
+            else { light_orange() }
+        } else {
+            if state { blue() }
+            else { orange() }
         };
         vec![self.button(color), self.hello()]
     }
