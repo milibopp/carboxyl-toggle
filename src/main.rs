@@ -18,7 +18,7 @@ mod button;
 
 
 fn settings() -> WindowSettings {
-    WindowSettings::new("carboxyl_window :: example/simple.rs", (640, 480))
+    WindowSettings::new("I'm a toggle button", (800, 600))
 }
 
 fn main() {
