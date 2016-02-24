@@ -1,7 +1,7 @@
 use elmesque::Form;
 use elmesque::text::Text;
 use elmesque::color::{Color, black, light_blue, light_orange, blue, orange};
-use elmesque::form::{text, rect};
+use elmesque::form::{text, rect, group};
 use benzene::Component;
 
 use app::Position;
@@ -14,8 +14,6 @@ pub type Context = Position;
 pub enum Action { Toggle }
 
 pub type State = bool;
-
-pub type View = Vec<Form>;
 
 
 #[derive(Clone)]
@@ -30,7 +28,7 @@ impl Component for Button {
     type Event = Event;
     type Action = Action;
     type State = bool;
-    type View = Vec<Form>;
+    type View = Form;
 
     fn intent(&self, context: Context, event: Event) -> Option<Action> {
         if self.click(event) && self.hovers(context) {
@@ -48,7 +46,7 @@ impl Component for Button {
         !current
     }
 
-    fn view(&self, context: Context, state: State) -> View {
+    fn view(&self, context: Context, state: State) -> Form {
         let color = if self.hovers(context) {
             if state { light_blue() }
             else { light_orange() }
@@ -56,7 +54,7 @@ impl Component for Button {
             if state { blue() }
             else { orange() }
         };
-        vec![self.button(color), self.hello()]
+        group(vec![self.button(color), self.hello()])
     }
 }
 

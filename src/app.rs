@@ -36,8 +36,7 @@ impl Component for App {
     type State = button::State;
     type View = Element;
 
-    fn intent(&self, context: Context, event: Event)
-        -> Option<button::Action>
+    fn intent(&self, context: Context, event: Event) -> Option<button::Action>
     {
         self.button.intent(
             centered(context.window.size, context.cursor.position),
@@ -59,7 +58,7 @@ impl Component for App {
         let button_view = self.button.view(
             centered(context.window.size, context.cursor.position),
             state);
-        collage(width as i32, height as i32, button_view)
+        collage(width as i32, height as i32, vec![button_view])
             .clear(black())
     }
 }
